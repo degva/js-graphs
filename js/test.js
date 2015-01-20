@@ -89,6 +89,7 @@ function App(canvas) {
 
 	/* Start App */
 	this.start = function () {
+		console.log('LOG: Starting App');
 		this.context.translate(0.5, 0.5);
 	};
 }
@@ -100,10 +101,6 @@ function App(canvas) {
 function Line(data, color) {
 	this.nodes = data;
 	this.color = color;
-	/*
-	this.maxVal = ...;
-	this.minVal = ...;
-	*/
 	this.maxVal = retrieveMaxVal(this.nodes);
 	this.minVal = retrieveMinVal(this.nodes);
 }
