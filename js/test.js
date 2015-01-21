@@ -35,12 +35,29 @@ function StackRender(ctxt, cHeight, cWidth) {
 		canvasWidth: cWidth
 	};
 	this.render = function() {
+		/* retrieve important data
+		 * for the grid.
+		 * How much data is in the array?
+		 */
+		var maxLength = 0;
+		var maxH = 0;
+		for (var i = 0; i < this.stack.length; i++) {
+			if (this.stack[i].nodes.length > maxLength) {
+				maxLength = this.stack[i].nodes.length - 1;
+			}
+			for (var e = 1; e < this.stack[i].nodes.length; e++ ) {
+				if (this.stack[i].nodes[e][1] > maxH) {
+					maxH = this.stack[i].nodes[e][1];
+				}
+			}
+		}
+
 		/* Draw Grid */
 		/* Should retrive the maximum
 		 * of all lines to make
 		 * a better fitting grif
 		 */
-		this.gridRender(10, 10);
+		this.gridRender(maxH, maxLength);
 		/*
 		 * For each value on the stack
 		 * 		Take data
@@ -48,24 +65,27 @@ function StackRender(ctxt, cHeight, cWidth) {
 		 * 		draw text
 		 */
 		for (var i = 0; i < this.stack.length; i++) {
-			this.renderLine(this.stack[i]);
+			this.renderLine(this.stack[i], maxH, maxLength);
 		}
 	}
 
-	this.renderLine = function(line) {
+	this.renderLine = function(line, maxH, maxLen) {
 		var context = this.localCanvasData.context;
-		var width = this.localCanvasData.canvasWidth;
-		var height = this.localCanvasData.canvasHeight;
+	
+		var cH = this.localCanvasData.canvasHeight - 100;
+		var cW = this.localCanvasData.canvasWidth - 150;
+	
+		var uniHeight = cH / maxH;
+		var uniWidth = cW / maxLen;
 
-		for (var i = 1; i < line.nodes.length - 1; i++ ) {
+		for (var i = 0; i < line.nodes.length - 2; i++ ) {
 			context.beginPath();
-			console.log("Just like that: " + line.nodes[i]);
 
-			x1 = (width / line.nodes.length-1)*(i+0.5);
-			y1 = height - (height / line.maxVal)*(line.nodes[i][1]-0.5);
+			x1 = 50 + (uniWidth)*(i);
+			y1 = 50 + cH - (uniHeight)*(line.nodes[i+1][1]);
 
-			x2 = (width / line.nodes.length-1)*(i+1.5);
-			y2 = height - (height / line.maxVal)*(line.nodes[i+1][1]-0.5);
+			x2 = 50 + (uniWidth)*(i+1)
+			y2 = 50 + cH - (uniHeight)*(line.nodes[i+2][1]);
 
 			context.moveTo(x1, y1);
 			context.lineTo(x2, y2);
@@ -78,25 +98,27 @@ function StackRender(ctxt, cHeight, cWidth) {
 	this.gridRender = function (nY, nX) {
 		console.log('LOG: Rendering the grid');
 		var context = this.localCanvasData.context;
-		var cH = this.localCanvasData.canvasHeight;
-		var cW = this.localCanvasData.canvasWidth;
+		var cH = this.localCanvasData.canvasHeight - 100;
+		var cW = this.localCanvasData.canvasWidth - 150;
 	
 		var uniHeight = cH / nY;
 		var uniWidth = cW / nX;
 
 		context.beginPath();
 
-		for ( var i = 1; i < nX; i++) {
-			context.moveTo(uniWidth * i, 0);
-			context.lineTo(uniWidth * i, cH);
+		/* Vertical Lines */
+		for ( var i = 0; i < nX+1; i++) {
+			context.moveTo(50 + uniWidth * i, 50);
+			context.lineTo(50 + uniWidth * i, cH+50);
 		}
 
-		for ( var i = 1; i < nY; i++) {
-			context.moveTo(0, uniHeight * i);
-			context.lineTo(cW, uniHeight * i);
+		/* Horizontal Lines */
+		for ( var i = 0; i < nY+1; i++) {
+			context.moveTo(50, 50 + uniHeight * i);
+			context.lineTo(cW+50, 50 + uniHeight * i);
 		}
 
-		context.strokeStyle = '#aaa';
+		context.strokeStyle = '#ddd';
 		context.stroke();
 		console.log('LOG: Done');
 	};
@@ -151,8 +173,8 @@ $(document).ready(function() {
 	var app = new App(canvas);
 	app.start();
 
-	var data = ['Line One',[1,2],[2,6],[3,9],[4,3],[5,1],[6,7]];
-	var line = new Line(data, '#567');
+	var data = ['Line One',[1,2],[2,6],[3,0],[4,3],[5,1],[6,12],[7,3],[8,20],[9,10]];
+	var line = new Line(data, '#FF0000');
 	app.addToStack(line);
 
 	app.sRender.render();
