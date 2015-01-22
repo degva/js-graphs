@@ -1,3 +1,4 @@
+
 /* Util functions
  * to use trough all the app
  */
@@ -58,6 +59,19 @@ function StackRender(ctxt, cHeight, cWidth) {
 		 * a better fitting grif
 		 */
 		this.gridRender(maxH, maxLength);
+		/* Retrieve X values */
+		var xValues = [];
+		/* Find for a way if the data is broken */
+		for (var i = 0; i < this.stack.length; i++ ) {
+			for (var e = 0; e < this.stack[i].nodes.length - 1; e++) {
+				if ( ! this.stack[i].nodes[e][0] in xValues) {
+					xValues.push(this.stack[i].nodes[e][0]);
+				}
+				/* */
+			}
+		}
+
+		xValues.sort();
 		/*
 		 * For each value on the stack
 		 * 		Take data
@@ -67,7 +81,7 @@ function StackRender(ctxt, cHeight, cWidth) {
 		for (var i = 0; i < this.stack.length; i++) {
 			this.renderLine(this.stack[i], maxH, maxLength);
 		}
-	}
+	};
 
 	this.renderLine = function(line, maxH, maxLen) {
 		var context = this.localCanvasData.context;
@@ -78,14 +92,14 @@ function StackRender(ctxt, cHeight, cWidth) {
 		var uniHeight = cH / maxH;
 		var uniWidth = cW / maxLen;
 
-		for (var i = 0; i < line.nodes.length - 2; i++ ) {
+		for (var i = 0; i < line.nodes.length - 1; i++ ) {
 			context.beginPath();
 
-			x1 = 50 + (uniWidth)*(i);
-			y1 = 50 + cH - (uniHeight)*(line.nodes[i+1][1]);
+			x1 = 80 + (uniWidth)*(i);
+			y1 = 50 + cH - (uniHeight)*(line.nodes[i][1]);
 
-			x2 = 50 + (uniWidth)*(i+1)
-			y2 = 50 + cH - (uniHeight)*(line.nodes[i+2][1]);
+			x2 = 80 + (uniWidth)*(i+1)
+			y2 = 50 + cH - (uniHeight)*(line.nodes[i+1][1]);
 
 			context.moveTo(x1, y1);
 			context.lineTo(x2, y2);
@@ -102,20 +116,30 @@ function StackRender(ctxt, cHeight, cWidth) {
 		var cW = this.localCanvasData.canvasWidth - 150;
 	
 		var uniHeight = cH / nY;
-		var uniWidth = cW / nX;
+		// var uniWidth = cW / nX;
 
 		context.beginPath();
 
+		var uniter = Math.round(50 / uniHeight);
+		// var uniter = uniHeight / 100;
+
+		
 		/* Vertical Lines */
+		/*
 		for ( var i = 0; i < nX+1; i++) {
-			context.moveTo(50 + uniWidth * i, 50);
-			context.lineTo(50 + uniWidth * i, cH+50);
+			if ( i % uniter == 0 ) {
+				context.moveTo(50 + uniWidth * i, 50);
+				context.lineTo(50 + uniWidth * i, cH+50);
+			}
 		}
+		*/
 
 		/* Horizontal Lines */
 		for ( var i = 0; i < nY+1; i++) {
-			context.moveTo(50, 50 + uniHeight * i);
-			context.lineTo(cW+50, 50 + uniHeight * i);
+			if ( i % uniter == 0 ) {
+				context.moveTo(50, this.localCanvasData.canvasHeight - ( 50 + uniHeight * i ));
+				context.lineTo(cW+50, this.localCanvasData.canvasHeight - ( 50 + uniHeight * i ));
+			}
 		}
 
 		context.strokeStyle = '#ddd';
@@ -165,17 +189,3 @@ Line.prototype = {
 	}
 };
 
-
-/* Start App
- */
-$(document).ready(function() {
-	var canvas = document.getElementById('canvas');
-	var app = new App(canvas);
-	app.start();
-
-	var data = ['Line One',[1,2],[2,6],[3,0],[4,3],[5,1],[6,12],[7,3],[8,20],[9,10]];
-	var line = new Line(data, '#FF0000');
-	app.addToStack(line);
-
-	app.sRender.render();
-});
